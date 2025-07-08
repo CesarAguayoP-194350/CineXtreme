@@ -16,7 +16,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->bind_param("sssss", $nombre, $usuario, $correo, $contrasena, $rol);
 
     if ($stmt->execute()) {
-        // Mostrar mensaje y redirigir en 3 segundos
         echo "<!DOCTYPE html>
         <html lang='es'>
         <head>
@@ -25,22 +24,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <script>
                 setTimeout(function() {
                     window.location.href = 'login.php';
-                }, 3000); // 3 segundos
+                }, 3000);
             </script>
             <style>
+                :root {
+                    --azul-oscuro: #1C1F4A;
+                    --azul-claro: #4F73C3;
+                    --gris-claro: #F2F2F2;
+                    --blanco: #FFFFFF;
+                    --rojo: #E63946;
+                    --amarillo: #F6D55C;
+                }
                 body {
-                    background-color: #0B1B36;
-                    color: #FFD700;
-                    font-family: 'Segoe UI', sans-serif;
+                    background-color: var(--azul-oscuro);
+                    color: var(--amarillo);
+                    font-family: 'Poppins', sans-serif;
                     display: flex;
                     flex-direction: column;
                     align-items: center;
                     justify-content: center;
                     height: 100vh;
                     text-align: center;
+                    padding: 20px;
                 }
                 h1 {
-                    font-size: 32px;
+                    font-size: 28px;
                     margin-bottom: 10px;
                 }
                 p {
@@ -55,7 +63,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </html>";
         exit();
     } else {
-        $mensaje = "Error: " . $stmt->error;
+        $mensaje = "❌ Error: " . $stmt->error;
     }
 }
 ?>
@@ -65,58 +73,83 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <head>
     <meta charset="UTF-8">
     <title>Registro - CineXtreme</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --azul-oscuro: #1C1F4A;
+            --azul-claro: #4F73C3;
+            --gris-claro: #F2F2F2;
+            --blanco: #FFFFFF;
+            --rojo: #E63946;
+            --amarillo: #F6D55C;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            background-color: #0B1B36;
-            font-family: 'Segoe UI', sans-serif;
-            color: #FFD700;
+            background-color: var(--azul-oscuro);
+            font-family: 'Poppins', sans-serif;
+            color: var(--blanco);
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            margin: 0;
+            padding: 20px;
         }
 
         .register-container {
-            background-color: #112244;
+            background-color: var(--azul-claro);
             padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0, 161, 157, 0.5);
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
             text-align: center;
-            width: 350px;
+            max-width: 450px;
+            width: 100%;
         }
 
         h2 {
-            margin-bottom: 20px;
-            color: #00A19D;
+            margin-bottom: 25px;
+            color: var(--amarillo);
         }
 
         input[type="text"],
         input[type="email"],
         input[type="password"] {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             margin: 10px 0;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
             font-size: 16px;
+            background-color: var(--gris-claro);
+            color: var(--azul-oscuro);
         }
 
         button {
             width: 100%;
-            padding: 10px;
-            background-color: #FFD700;
-            color: #0B1B36;
+            padding: 12px;
+            background-color: var(--amarillo);
+            color: var(--azul-oscuro);
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
             font-size: 16px;
-            cursor: pointer;
             font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background-color: var(--rojo);
+            color: var(--blanco);
         }
 
         p {
             margin-top: 15px;
-            color: #FF6B6B;
+            color: var(--rojo);
         }
     </style>
 </head>
@@ -124,10 +157,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <div class="register-container">
         <h2>Registro de usuario</h2>
         <form method="post">
-            <input type="text" name="nombre" placeholder="Nombre completo" required><br>
-            <input type="text" name="usuario" placeholder="Nombre de usuario" required><br>
-            <input type="email" name="correo" placeholder="Correo electrónico" required><br>
-            <input type="password" name="contrasena" placeholder="Contraseña" required><br><br>
+            <input type="text" name="nombre" placeholder="Nombre completo" required>
+            <input type="text" name="usuario" placeholder="Nombre de usuario" required>
+            <input type="email" name="correo" placeholder="Correo electrónico" required>
+            <input type="password" name="contrasena" placeholder="Contraseña" required>
             <button type="submit">Registrarse</button>
         </form>
         <p><?php echo $mensaje; ?></p>
