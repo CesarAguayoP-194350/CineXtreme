@@ -1,4 +1,4 @@
-﻿<?php
+﻿<?php 
 session_start();
 if (!isset($_SESSION["usuario"]) || $_SESSION["rol"] !== "administrador") {
     header("Location: login.php");
@@ -7,11 +7,8 @@ if (!isset($_SESSION["usuario"]) || $_SESSION["rol"] !== "administrador") {
 
 require_once 'includes/db.php';
 
-// Eliminar película si se recibe ID por GET
 if (isset($_GET['eliminar'])) {
     $id = $_GET['eliminar'];
-
-    // Obtener ruta de imagen y eliminar archivo si existe
     $sqlImg = "SELECT imagen FROM peliculas WHERE id = ?";
     $stmtImg = $conn->prepare($sqlImg);
     $stmtImg->bind_param("i", $id);
@@ -22,15 +19,12 @@ if (isset($_GET['eliminar'])) {
             unlink($row['imagen']);
         }
     }
-
-    // Eliminar de la base de datos
     $sqlDel = "DELETE FROM peliculas WHERE id = ?";
     $stmtDel = $conn->prepare($sqlDel);
     $stmtDel->bind_param("i", $id);
     $stmtDel->execute();
 }
 
-// Obtener todas las películas
 $sql = "SELECT * FROM peliculas ORDER BY id DESC";
 $resultado = $conn->query($sql);
 ?>
@@ -40,83 +34,122 @@ $resultado = $conn->query($sql);
 <head>
     <meta charset="UTF-8">
     <title>Películas - Administrador</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background-color: #0B1B36;
-            color: #FFD700;
+        :root {
+            --azul-oscuro: #1C1F4A;
+            --azul-claro: #4F73C3;
+            --gris-claro: #F2F2F2;
+            --blanco: #FFFFFF;
+            --rojo: #E63946;
+            --amarillo: #F6D55C;
+        }
+
+        * {
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--azul-oscuro), var(--azul-claro));
+            color: var(--blanco);
+            padding: 30px;
         }
 
         h2 {
-            color: #00A19D;
             text-align: center;
-        }
-
-        a {
-            text-decoration: none;
-            color: #00A19D;
-            font-weight: bold;
+            margin-bottom: 20px;
+            color: var(--amarillo);
         }
 
         .agregar {
-            display: block;
-            width: fit-content;
-            margin: 10px auto 20px auto;
-            padding: 10px 20px;
-            background-color: #FFD700;
-            color: #0B1B36;
-            border-radius: 6px;
+           display: inline-block;
+           margin: 0 auto 30px;
+           background-color: var(--amarillo);
+           color: var(--azul-oscuro);
+           padding: 12px 25px;
+           font-weight: bold;
+           border-radius: 10px;
+           text-decoration: none;
+           transition: background 0.3s ease;
+           max-width: 250px;
+           text-align: center;
+        }
+
+
+        .agregar:hover {
+            background-color: var(--rojo);
+            color: var(--blanco);
         }
 
         table {
-            width: 95%;
-            margin: auto;
+            width: 100%;
             border-collapse: collapse;
-            background-color: #112244;
             border-radius: 10px;
             overflow: hidden;
-            box-shadow: 0 0 12px rgba(0,161,157,0.3);
+            box-shadow: 0 0 20px rgba(0,0,0,0.4);
+            background-color: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
         }
 
         th, td {
-            padding: 12px;
+            padding: 15px;
             text-align: center;
         }
 
         th {
-            background-color: #00A19D;
-            color: #fff;
+            background-color: var(--azul-claro);
+            color: var(--blanco);
         }
 
         tr:nth-child(even) {
-            background-color: #1A2C4D;
+            background-color: rgba(255,255,255,0.03);
         }
 
         tr:hover {
-            background-color: #223C60;
+            background-color: rgba(255,255,255,0.08);
         }
 
         img {
-            border-radius: 8px;
-            max-height: 80px;
+            border-radius: 10px;
+            height: 80px;
+            object-fit: cover;
         }
 
         .acciones a {
-            margin: 0 5px;
-            color: #FFD700;
+            margin: 0 8px;
+            color: var(--amarillo);
+            font-size: 16px;
+            text-decoration: none;
         }
 
         .acciones a:hover {
-            color: #FF6B6B;
+            color: var(--rojo);
         }
 
         .volver {
             display: block;
             text-align: center;
-            margin-top: 30px;
-            color: #00A19D;
+            margin-top: 40px;
+            color: var(--blanco);
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .volver:hover {
+            color: var(--amarillo);
+        }
+
+        @media (max-width: 768px) {
+            table, th, td {
+                font-size: 14px;
+            }
+
+            img {
+                height: 60px;
+            }
         }
     </style>
 </head>
@@ -147,14 +180,13 @@ $resultado = $conn->query($sql);
                 <?php endif; ?>
             </td>
             <td class="acciones">
-                <a href="admin-editar-pelicula.php?id=<?php echo $row['id']; ?>">✏️ Editar</a> |
+                <a href="admin-editar-pelicula.php?id=<?php echo $row['id']; ?>">✏️ Editar</a>
                 <a href="?eliminar=<?php echo $row['id']; ?>" onclick="return confirm('¿Seguro que deseas eliminar esta película?');">🗑️ Eliminar</a>
             </td>
         </tr>
         <?php endwhile; ?>
     </table>
 
-    <a class="volver" href="admin-dashboard.php">← Volver al Dashboard</a>
+    <a class="volver" href="admin-dashboard.php">❌</a>
 </body>
 </html>
-
