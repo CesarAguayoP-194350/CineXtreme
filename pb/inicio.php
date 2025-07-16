@@ -47,7 +47,7 @@
     .logo img {
       height: 50px;
       margin-right: 15px;
-      border-radius: 5%;
+      border-radius: 10%;
       object-fit: cover;
       box-shadow: 0 0 10px rgba(0,0,0,0.3);
     }

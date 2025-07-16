@@ -1,179 +1,178 @@
-﻿<!DOCTYPE html>
+﻿<?php
+session_start();
+if (!isset($_SESSION["usuario"]) || $_SESSION["rol"] !== "administrador") {
+    header("Location: login.php");
+    exit();
+}
+
+require_once 'includes/db.php';
+
+$mensaje = "";
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $titulo = $_POST["titulo"];
+    $resumen = $_POST["resumen"];
+    $genero = $_POST["genero"];
+    $fecha = $_POST["fecha_publicacion"];
+    $puntuacion = (int)$_POST["puntuacion"]; // Conversión segura a entero
+    $imagen = $_POST["imagen"]; // URL
+
+   
+    echo "<pre>";
+    print_r($_POST);
+    echo "</pre>";
+  
+
+    $sql = "INSERT INTO peliculas (titulo, resumen, genero, fecha_publicacion, imagen, puntuacion) 
+            VALUES (?, ?, ?, ?, ?, ?)";
+    $stmt = $conn->prepare($sql);
+    if ($stmt) {
+        $stmt->bind_param("sssssi", $titulo, $resumen, $genero, $fecha, $imagen, $puntuacion);
+        if ($stmt->execute()) {
+            $mensaje = "✅ Película agregada correctamente.";
+        } else {
+            $mensaje = "❌ Error al guardar: " . $stmt->error;
+        }
+        $stmt->close();
+    } else {
+        $mensaje = "❌ Error al preparar la consulta: " . $conn->error;
+    }
+}
+?>
+
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Agregar Película - CineXtreme</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --azul-oscuro: #1C1F4A;
-      --azul-claro: #4F73C3;
-      --gris-claro: #F2F2F2;
-      --blanco: #FFFFFF;
-      --rojo: #E63946;
-      --amarillo: #F6D55C;
-    }
+    <meta charset="UTF-8">
+    <title>Agregar Película - CineXtreme</title>
+    <style>
+        body {
+            background-color: #0B1B36;
+            color: #FFD700;
+            font-family: 'Segoe UI', sans-serif;
+            display: flex;
+            justify-content: center;
+            padding: 40px;
+        }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+        .form-container {
+            background-color: #112244;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(0, 161, 157, 0.5);
+            max-width: 600px;
+            width: 100%;
+        }
 
-    body {
-      background: linear-gradient(145deg, var(--azul-oscuro), var(--azul-claro));
-      font-family: 'Poppins', sans-serif;
-      color: var(--blanco);
-      min-height: 100vh;
-      padding: 60px 20px;
-      display: flex;
-      justify-content: center;
-      overflow-y: auto;
-    }
+        h2 {
+            color: #00A19D;
+            text-align: center;
+            margin-bottom: 20px;
+        }
 
-    .form-container {
-      background: rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 35px;
-      border-radius: 20px;
-      box-shadow: 0 0 25px rgba(0, 0, 0, 0.3);
-      max-width: 600px;
-      width: 100%;
-    }
+        input[type="text"],
+        input[type="url"],
+        input[type="date"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            border: none;
+            font-size: 15px;
+        }
 
-    h2 {
-      color: var(--amarillo);
-      text-align: center;
-      margin-bottom: 25px;
-    }
+        textarea {
+            resize: vertical;
+        }
 
-    label {
-      font-weight: 600;
-      margin-top: 15px;
-      display: block;
-      color: var(--gris-claro);
-    }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #FFD700;
+            color: #0B1B36;
+            font-weight: bold;
+            font-size: 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
 
-    input[type="text"],
-    input[type="url"],
-    input[type="date"],
-    textarea,
-    select {
-      width: 100%;
-      padding: 12px;
-      margin-top: 8px;
-      margin-bottom: 20px;
-      border-radius: 8px;
-      border: none;
-      background-color: var(--gris-claro);
-      color: var(--azul-oscuro);
-      font-size: 15px;
-    }
+        button:hover {
+            background-color: #e6c200;
+        }
 
-    textarea {
-      resize: vertical;
-    }
+        p {
+            text-align: center;
+            color: #00FFAA;
+        }
 
-    button {
-      background-color: var(--amarillo);
-      color: var(--azul-oscuro);
-      font-weight: bold;
-      padding: 14px;
-      border: none;
-      border-radius: 10px;
-      width: 100%;
-      font-size: 16px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
+        a {
+            display: block;
+            text-align: center;
+            margin-top: 25px;
+            color: #00A19D;
+            text-decoration: none;
+        }
 
-    button:hover {
-      background-color: var(--rojo);
-      color: var(--blanco);
-    }
+        a:hover {
+            text-decoration: underline;
+        }
 
-    .mensaje {
-      text-align: center;
-      margin-top: 20px;
-      font-weight: bold;
-      color: var(--amarillo);
-    }
-
-    .back-link {
-      display: block;
-      text-align: center;
-      margin-top: 25px;
-      color: var(--blanco);
-      text-decoration: none;
-      font-weight: bold;
-    }
-
-    .back-link:hover {
-      color: var(--amarillo);
-    }
-
-    @media (max-width: 600px) {
-      .form-container {
-        padding: 25px;
-      }
-
-      body {
-        padding: 40px 15px;
-      }
-    }
-  </style>
+        label {
+            color: #FFD700;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
-  <div class="form-container">
-    <h2>🎬 Agregar Nueva Película</h2>
+    <div class="form-container">
+        <h2>🎬 Agregar Nueva Película</h2>
 
-    <form method="post">
-      <label for="titulo">Título:</label>
-      <input type="text" name="titulo" id="titulo" required placeholder="Ej: El Templo de los Huesos">
+        <form method="post">
+            <label>Título:</label>
+            <input type="text" name="titulo" placeholder="Título de la película" required>
 
-      <label for="resumen">Resumen:</label>
-      <textarea name="resumen" id="resumen" rows="4" required placeholder="Describe brevemente la trama..."></textarea>
+            <label>Resumen:</label>
+            <textarea name="resumen" placeholder="Resumen" rows="4" required></textarea>
 
-      <label for="genero">Género:</label>
-      <select name="genero" id="genero" required>
-        <option value="">Seleccionar género</option>
-        <option>Acción</option>
-        <option>Comedia</option>
-        <option>Drama</option>
-        <option>Fantasía</option>
-        <option>Terror</option>
-        <option>Romance</option>
-        <option>Ciencia Ficción</option>
-        <option>Suspenso</option>
-        <option>Animación</option>
-        <option>Otro</option>
-      </select>
+            <label>Género:</label>
+            <select name="genero" required>
+                <option value="Acción">Acción</option>
+                <option value="Comedia">Comedia</option>
+                <option value="Drama">Drama</option>
+                <option value="Fantasía">Fantasía</option>
+                <option value="Terror">Terror</option>
+                <option value="Romance">Romance</option>
+                <option value="Ciencia Ficción">Ciencia Ficción</option>
+                <option value="Suspenso">Suspenso</option>
+                <option value="Animación">Animación</option>
+                <option value="Otro">Otro</option>
+            </select>
 
-      <label for="fecha_publicacion">Fecha de publicación:</label>
-      <input type="date" name="fecha_publicacion" id="fecha_publicacion" required>
+            <label>Fecha de publicación:</label>
+            <input type="date" name="fecha_publicacion" required>
 
-      <label for="imagen">URL de la imagen:</label>
-      <input type="url" name="imagen" id="imagen" placeholder="https://ejemplo.com/poster.jpg" required>
+            <label>URL de la imagen:</label>
+            <input type="url" name="imagen" placeholder="https://ejemplo.com/imagen.jpg" required>
 
-      <label for="puntuacion">Puntuación:</label>
-      <select name="puntuacion" id="puntuacion" required>
-        <option value="">Califica del 1 al 5</option>
-        <option>1</option>
-        <option>2</option>
-        <option>3</option>
-        <option>4</option>
-        <option>5</option>
-      </select>
+            <label>Puntuación:</label>
+            <select name="puntuacion" required>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+            </select>
 
-      <button type="submit">📥 Guardar Película</button>
-    </form>
+            <button type="submit">📥 Guardar Película</button>
+        </form>
 
-    <?php if (!empty($mensaje)): ?>
-      <p class="mensaje"><?php echo $mensaje; ?></p>
-    <?php endif; ?>
-
-    <a href="admin-dashboard.php" class="back-link">⬅ Volver al panel</a>
-  </div>
+        <p><?php echo $mensaje; ?></p>
+        <a href="admin-dashboard.php">← Volver al Dashboard</a>
+    </div>
 </body>
 </html>
+
